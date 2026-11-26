@@ -59,3 +59,24 @@ function renderMessage(sender, content, datetime) {
     `;
 	chatBox.appendChild(div);
 }
+
+// View Profile functionality
+function viewProfile() {
+	if (selectedUsername) {
+		window.location.href = `/profile?user=${encodeURIComponent(
+			selectedUsername
+		)}`;
+	}
+}
+
+// Ban User Functionality - ADMIN ONLY
+function banUser() {
+	if (selectedUsername && confirm(`Ban ${selectedUsername}?`)) {
+		fetch(`/ban-username/${encodeURIComponent(selectedUsername)}`, {
+			method: "POST",
+		}).then(() => {
+			alert(`${selectedUsername} has been banned.`);
+			location.reload();
+		});
+	}
+}
