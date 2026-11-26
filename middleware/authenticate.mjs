@@ -10,4 +10,4 @@ isAdmin = (req, res, next) => {
   return res.status(403).send('Access denied');
 }
 
-export {isAuthenticated, isAdmin}
+export { isAuthenticated, isAdmin }
