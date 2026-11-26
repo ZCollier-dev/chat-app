@@ -1,0 +1,26 @@
+<%- include('../partials/header', { title: "Dashboard" }) %>
+<div class="main-content">
+	<h1>Dashboard</h1>
+	<p class="welcome-message">Welcome, <%= username %>!</p>
+	<p id="online-users">Users Currently In Chat:</p>
+
+	<script>
+		fetch("/api/online-users")
+			.then((res) => res.json())
+			.then((data) => {
+				document.getElementById(
+					"online-users"
+				).textContent = `Users In Chat: ${data.count}`;
+			})
+			.catch(() => {
+				document.getElementById(
+					"online-users"
+				).textContent = `Users In Chat: Not available.`;
+			});
+	</script>
+	<div class="button-container">
+		<form action="/logout" method="POST" style="display: inline">
+			<button type="submit" class="logout">Logout</button>
+	</div>
+</div>
+<%- include('../partials/footer') %>

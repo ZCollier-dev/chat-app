@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title: "Welcome" }) %>
+<link rel="stylesheet" href="/styles.css" />
+
+<div class="main-content">
+	<h1>Welcome to the Real-Time Chat</h1>
+
+	<p id="online-users">Users Currently In Chat:</p>
+
+	<script>
+		fetch("/api/online-users")
+			.then((res) => res.json())
+			.then((data) => {
+				document.getElementById(
+					"online-users"
+				).textContent = `Users In Chat: ${data.count}`;
+			})
+			.catch(() => {
+				document.getElementById(
+					"online-users"
+				).textContent = `Users In Chat: Not available.`;
+			});
+	</script>
+
+	<div class="button-container">
+		<button onclick="window.location.href='/login'">Login</button>
+		<button onclick="window.location.href='/signup'">Sign Up</button>
+	</div>
+</div>
+
+<%- include('../partials/footer') %>
