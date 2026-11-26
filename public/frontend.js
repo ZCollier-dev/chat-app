@@ -80,3 +80,24 @@ function banUser() {
 		});
 	}
 }
+
+// Context menu on right click
+document.addEventListener("contextmenu", function (e) {
+	const target = e.target;
+	if (target.classList.contains("chat-username")) {
+		e.preventDefault();
+		selectedUsername = target.dataset.username;
+
+		const menu = document.getElementById("context-menu");
+		menu.style.top = `${e.pageY}px`;
+		menu.style.left = `${e.pageX}px`;
+		menu.style.display = "block";
+	} else {
+		document.getElementById("context-menu").style.display = "none";
+	}
+});
+
+// Context menu click event
+document.addEventListener("click", function () {
+	document.getElementById("context-menu").style.display = "none";
+});
