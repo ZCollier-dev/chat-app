@@ -1,0 +1,41 @@
+<%- include('../partials/header', { title: "Admin Dashboard" }) %>
+<link rel="stylesheet" href="/styles.css">
+
+<div class="main-content">
+  <h1>Admin Dashboard</h1>
+
+  <% if (flash) { %>
+    <div class="flash-message <%= flash.type %>"><%= flash.message %></div>
+  <% } %>
+
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Joined</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.username %></td>
+          <td><%= user.role %></td>
+          <td><%= new Date(user.joinDate).toLocaleDateString() %></td>
+          <td>
+            <% if (user.role !== 'admin') { %>
+              <form action="/ban/<%= user._id %>" method="POST" onsubmit="return confirm('Ban this user?')">
+                <button type="submit" class="ban-button">Ban</button>
+              </form>
+            <% } else { %>
+              <em>Protected</em>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>
