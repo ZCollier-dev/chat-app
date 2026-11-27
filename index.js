@@ -124,6 +124,122 @@ app.get("/", (req, res) => {
 	}
 });
 
+// Renders login page
+app.get("/login", (req, res) => {
+	res.render("index/login", { errorMessage: null });
+});
+
+// Requests login data from user, compares to database, redirects if successful
+app.post("/login", async (req, res) => {
+	const { username, password } = req.body;
+	const user = await User.findOne({ username });
+	if (!user || !(await bcrypt.compare(password, user.password))) {
+		return res.render("index/login", { errorMessage: "Invalid credentials" });
+	}
+	req.session.user = user;
+	res.redirect("/");
+});
+
+// Renders signup page
+app.get("/signup", (req, res) => {
+	res.render("index/signup", { errorMessage: null });
+});
+
+// Requests signup data from user, compares username to database, checks for correct admin code if role will be admin, redirects if successful and depending on role
+// <Typically, the secret admin code would be stored more securely, but for the purposes of this project, the Secret Admin Code to enter when registering as an admin is:
+// "SECRET_ADMIN_CODE">
+app.post("/signup", async (req, res) => {
+	const { username, password, role, adminCode } = req.body;
+	const existing = await User.findOne({ username });
+	if (existing)
+		return res.render("index/signup", { errorMessage: "Username taken" });
+
+	if (role === "admin" && adminCode !== "SECRET_ADMIN_CODE") {
+		return res.render("index/signup", { errorMessage: "Invalid admin code" });
+	}
+
+	const hashed = await bcrypt.hash(password, 10);
+
+	if (role === "admin") {
+		console.log(`⚠️  New admin registered: ${username}`);
+	}
+
+	const newUser = new User({
+		username,
+		password: hashed,
+		role,
+		color: "#000000",
+	});
+	await newUser.save();
+	req.session.user = newUser;
+	res.redirect(role === "admin" ? "/admin" : "/?welcome=1");
+});
+
+// Renders chat page if authenticated
+app.get("/chat", isAuthenticated, (req, res) => {
+	res.render("index/chat", {
+		username: req.session.user.username,
+		user: req.session.user,
+	});
+});
+
+// Renders profile page
+app.get("/profile", isAuthenticated, async (req, res) => {
+	let username;
+	if (!req.query.user) {
+		username = req.session.user.username;
+	} else {
+		username = req.query.user;
+	}
+
+	const user = await User.findOne({ username: username });
+	const joinDate = user.joinDate;
+	res.render("index/profile", {
+		username: username,
+		joinDate: joinDate,
+		user: req.session.user,
+	});
+});
+
+// Renders admin page
+app.get("/admin", isAuthenticated, isAdmin, async (req, res) => {
+	const users = await User.find();
+	const flash = req.session.flash;
+	delete req.session.flash;
+	res.render("index/admin", { users, flash, user: req.session.user });
+});
+
+// API to get users currently in chat
+app.get("/api/online-users", (req, res) => {
+	res.json({ count: onlineUsers.size });
+});
+
+// Ban - finds a user's id and deltes them from the database - ADMIN ONLY
+app.post("/ban/:id", isAuthenticated, isAdmin, async (req, res) => {
+	await User.findByIdAndDelete(req.params.id);
+	req.session.flash = { type: "success", message: "User has been banned." };
+	res.redirect("/admin");
+});
+
+// Ban - finds a user's username and deletes them from the database - ADMIN ONLY
+app.post(
+	"/ban-username/:username",
+	isAuthenticated,
+	isAdmin,
+	async (req, res) => {
+		const username = req.params.username;
+		const user = await User.findOne({ username });
+		if (user && user.role !== "admin") {
+			await User.findByIdAndDelete(user._id);
+			req.session.flash = {
+				type: "success",
+				message: `${username} has been banned.`,
+			};
+		}
+		res.sendStatus(200);
+	}
+);
+
 // Destroys the user's session and cookies, logging them out.
 app.post("/logout", (req, res) => {
 	req.session.destroy((err) => {

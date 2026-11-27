@@ -8,4 +8,4 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model('User', messageSchema);
+export default mongoose.model('Message', messageSchema);
