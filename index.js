@@ -110,7 +110,19 @@ function broadcast(data) {
 	});
 }
 
-
+// Index - renders either authenticated or unauthenticated pages depending on if the user is logged in
+app.get("/", (req, res) => {
+	const showWelcome = req.query.welcome === "1";
+	if (req.session.user) {
+		res.render("index/authenticated", {
+			username: req.session.user.username,
+			user: req.session.user,
+			showWelcome,
+		});
+	} else {
+		res.render("index/unauthenticated", { showWelcome });
+	}
+});
 
 // Destroys the user's session and cookies, logging them out.
 app.post("/logout", (req, res) => {
