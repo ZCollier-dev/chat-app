@@ -1,0 +1,53 @@
+<%- include('../partials/header', { title: "Sign Up" }) %>
+<link rel="stylesheet" href="/styles.css">
+
+<div class="main-content">
+  <h1>Create an Account</h1>
+
+  <% if (errorMessage) { %>
+    <p class="error-message"><%= errorMessage %></p>
+  <% } %>
+
+  <form action="/signup" method="post" style="width: 300px">
+    <div class="form-input-container">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required />
+    </div>
+
+    <div class="form-input-container">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required />
+    </div>
+
+    <div class="form-input-container">
+      <label for="role">Role:</label>
+      <select id="role" name="role" required onchange="toggleAdminCode()">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+
+    <div class="form-input-container" id="admin-code-field" style="display: none;">
+      <label for="adminCode">Admin Code:</label>
+      <input type="text" id="adminCode" name="adminCode" />
+    </div>
+
+    <button type="submit" class="action-button full-width">Sign Up</button>
+  </form>
+
+  <p style="font-size: 16px; margin-top: 30px">
+    Already have an account? <a href="/login" class="register-link">Log In!</a>
+  </p>
+</div>
+
+<script>
+  function toggleAdminCode() {
+    const role = document.getElementById('role').value;
+    const adminCodeField = document.getElementById('admin-code-field');
+    adminCodeField.style.display = role === 'admin' ? 'block' : 'none';
+  }
+
+  window.addEventListener('DOMContentLoaded', toggleAdminCode);
+</script>
+
+<%- include('../partials/footer') %>
